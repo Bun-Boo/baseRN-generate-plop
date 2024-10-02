@@ -1,0 +1,21 @@
+import { createSlice } from '@reduxjs/toolkit';
+import { I{{pascalCase nameRedux}} } from './type';
+
+const initialState : I{{pascalCase nameRedux}} = {};
+
+const {{nameRedux}}Slice = createSlice({
+  name: '{{nameRedux}}Reducer',
+  initialState,
+  reducers: {
+    // Add your reducers here
+  }
+});
+
+export const {} =
+  {{nameRedux}}Slice.actions;
+
+export const {{nameRedux}}Storage = (state: any): I{{pascalCase nameRedux}} =>
+  state.{{nameRedux}}Reducer;
+export default {{nameRedux}}Slice.reducer;
+
+export const { actions, reducer } = {{nameRedux}}Slice;

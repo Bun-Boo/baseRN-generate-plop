@@ -1,0 +1,13 @@
+import { combineReducers } from 'redux';
+import { enableMapSet } from 'immer';
+import {{nameRedux}}Reducer from './{{nameRedux}}/slice';
+
+export interface ApplicationState {}
+
+enableMapSet();
+
+const rootReducer = combineReducers({
+  {{nameRedux}}: {{nameRedux}}Reducer,
+});
+
+export default rootReducer;
