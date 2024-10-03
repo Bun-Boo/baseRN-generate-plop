@@ -1,0 +1,110 @@
+import React, {ReactElement, ReactNode} from 'react';
+import Modal from 'react-native-modal';
+import {View, StyleSheet, ViewStyle, StyleProp} from 'react-native';
+import FooterModal from './FooterModal';
+interface ModalContainerProps {
+  modalVisible: boolean;
+  children: ReactNode;
+  toggleModal: () => void;
+  isBottom?: boolean;
+  isFooter?: boolean;
+  singleBtnConfirm?: boolean;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm?: () => void;
+  disable?: boolean;
+  styleContent?: StyleProp<ViewStyle>;
+  backdropOpacity?: number;
+  animationOut?: boolean;
+  animationIn?: boolean;
+}
+
+function ModalGlobal({
+  children,
+  modalVisible,
+  toggleModal,
+  isBottom = true,
+  isFooter = false,
+  singleBtnConfirm = false,
+  cancelText,
+  confirmText,
+  onConfirm,
+  styleContent,
+  backdropOpacity,
+  disable = false,
+  animationOut = false,
+  animationIn = false,
+}: ModalContainerProps): ReactElement {
+  return (
+    <Modal
+      style={isBottom ? styles.modalBottom : styles.modalCenter}
+      isVisible={modalVisible}
+      backdropOpacity={backdropOpacity ? backdropOpacity : 0.3}
+      backdropTransitionOutTiming={0}
+      backdropTransitionInTiming={0}
+      onBackdropPress={toggleModal}
+      useNativeDriverForBackdrop
+      animationOut={animationOut ? 'fadeOut' : undefined}
+      animationIn={animationIn ? 'fadeIn' : undefined}
+      // onSwipeComplete={(): void => {
+      //   toggleModal();
+      // }}
+      // swipeDirection={['down']}
+      scrollHorizontal
+      avoidKeyboard>
+      <View
+        style={[
+          isBottom ? styles.modalContent : styles.modalContentCenter,
+          styleContent,
+        ]}>
+        {/*{isBottom && <View style={styles.scrollDown} />}*/}
+        {children}
+        {isFooter && (
+          <FooterModal
+            singleBtnConfirm={singleBtnConfirm}
+            cancelText={cancelText}
+            confirmText={confirmText}
+            toggleModal={toggleModal}
+            onConfirm={onConfirm}
+            disable={disable}
+          />
+        )}
+      </View>
+    </Modal>
+  );
+}
+
+export default ModalGlobal;
+
+export const styles = StyleSheet.create({
+  modalBottom: {
+    justifyContent: 'flex-end',
+    margin: 0,
+  },
+  modalCenter: {
+    justifyContent: 'center',
+    margin: 0,
+    paddingHorizontal: 10,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopRightRadius: 16,
+    borderTopLeftRadius: 16,
+    paddingBottom: 15,
+    paddingHorizontal: 15,
+  },
+  modalContentCenter: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 10,
+  },
+  scrollDown: {
+    width: 56,
+    height: 4,
+    borderRadius: 10,
+    backgroundColor: '#ccc',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    marginTop: 10,
+  },
+});

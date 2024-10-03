@@ -1,0 +1,173 @@
+import React, {ReactElement, memo} from 'react';
+import {Text, TextProps, StyleSheet, TextStyle, StyleProp} from 'react-native';
+
+interface AppTextProps extends TextProps {
+  size?: 'default' | 'medium' | 'bold' | 'light';
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
+  fill?: any;
+  flex?: number;
+  children?: React.ReactNode;
+  fontSize?: number;
+  color?: string;
+  lineHeight?: number;
+  fontWeight?: string;
+  paddingBottom?: number;
+  paddingLeft?: number;
+  paddingRight?: number;
+  maxWidth?: number;
+  paddingTop?: number;
+  padding?: number;
+  paddingHorizontal?: number;
+  paddingVertical?: number;
+  marginBottom?: number;
+  marginLeft?: number;
+  marginRight?: number;
+  marginTop?: number;
+  margin?: number;
+  marginHorizontal?: number;
+  marginVertical?: number;
+  borderRadius?: number;
+  numberOfLines?: number;
+  opacity?: number;
+  fontStyle?: string;
+  style?: StyleProp<TextStyle>;
+}
+
+function AppText({
+  size = 'default',
+  textAlign = 'left',
+  color = 'black',
+  fill,
+  flex,
+  fontSize = 14,
+  lineHeight,
+  children,
+  fontWeight,
+  paddingBottom,
+  paddingLeft,
+  paddingRight,
+  paddingTop,
+  padding,
+  paddingHorizontal,
+  paddingVertical,
+  maxWidth,
+  marginBottom,
+  marginLeft,
+  marginRight,
+  marginTop,
+  margin,
+  marginHorizontal,
+  marginVertical,
+  borderRadius,
+  numberOfLines = 0,
+  opacity,
+  fontStyle,
+  style,
+  ...restProps
+}: AppTextProps | any): ReactElement {
+  let styleType;
+  switch (size) {
+    case 'medium':
+      styleType = styles.textMedium;
+      break;
+    case 'bold':
+      styleType = styles.textBold;
+      break;
+    case 'light':
+      styleType = styles.textLight;
+      break;
+    default:
+      styleType = styles.textDefault;
+  }
+
+  return (
+    <Text
+      numberOfLines={numberOfLines}
+      {...restProps}
+      style={[
+        fill && Layout.fill,
+        flex && {flex},
+        textAlign && {textAlign},
+        color && {color},
+        fontSize && {fontSize},
+        lineHeight && {lineHeight},
+        fontWeight && {fontWeight},
+        maxWidth && {maxWidth},
+        paddingBottom && {
+          paddingBottom: paddingBottom,
+        },
+        paddingLeft && {paddingLeft: paddingLeft},
+        paddingRight && {paddingRight: paddingRight},
+        paddingTop && {paddingTop: paddingTop},
+        padding && {padding: padding},
+        paddingHorizontal && {
+          paddingHorizontal: paddingHorizontal,
+        },
+        paddingVertical && {
+          paddingVertical: paddingVertical,
+        },
+        marginBottom && {marginBottom: marginBottom},
+        marginLeft && {marginLeft: marginLeft},
+        marginRight && {marginRight: marginRight},
+        marginTop && {marginTop: marginTop},
+        margin && {margin: margin},
+        marginHorizontal && {
+          marginHorizontal: marginHorizontal,
+        },
+        marginVertical && {
+          marginVertical: marginVertical,
+        },
+        borderRadius && {
+          borderRadius: borderRadius,
+        },
+        opacity && {opacity: opacity},
+        fontStyle && {fontStyle: fontStyle},
+        style,
+        styleType,
+      ]}>
+      {children}
+    </Text>
+  );
+}
+
+const styles = StyleSheet.create({
+  textDefault: {letterSpacing: 0.5},
+  textMedium: {
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  textBold: {fontWeight: '800', letterSpacing: 0.5},
+  textLight: {fontWeight: '300', letterSpacing: 0.5},
+});
+
+export default memo(AppText);
+
+const Layout = StyleSheet.create({
+  /* Row Layouts */
+  row: {
+    flexDirection: 'row',
+  },
+  rowAlignCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rowReverse: {
+    flexDirection: 'row-reverse',
+  },
+  /* Column Layouts */
+  column: {
+    flexDirection: 'column',
+  },
+  columnReverse: {
+    flexDirection: 'column-reverse',
+  },
+  justifyCenter: {
+    justifyContent: 'center',
+  },
+  alignCenter: {
+    alignItems: 'center',
+  },
+  fill: {
+    flex: 1,
+  },
+});

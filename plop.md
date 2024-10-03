@@ -16,8 +16,16 @@ npx plop screen
 npx plop component
 ```
 
-# create a service
+# create a redux
 
 ```bash
 npx plop redux
+```
+
+# trước khi tạo bottom tab, cần tạo các file sau trước
+
+```bash
+npx plop config
+npx plop ui-global
+npx plop nav-services
 ```

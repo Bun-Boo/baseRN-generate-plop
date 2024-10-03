@@ -1,0 +1,179 @@
+import React, { useEffect, useState } from 'react';
+import { Animated, Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import {
+  getFocusedRouteNameFromRoute,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
+import RouteList from './RouteList';
+import Config from '../config';
+import { useAppSelector } from '../redux/hooks';
+import AppText from 'src/components/globals/AppText';
+
+import RouteName from './RouteName';
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import NavigationService from './NaviagationServices';
+const HEIGHT_TAB_BAR = 65;
+
+const BottomTabContent = React.memo(function BottomTabContent({ state, descriptors, navigation }: BottomTabBarProps) {
+  useEffect(() => {
+    NavigationService.setTopLevelNavigator(navigation);
+    NavigationService.setAnimatedNavigator(animateSlider)
+  }, [])
+
+  const totalWidth = Dimensions.get('window').width;
+  const tabWidth = totalWidth / state.routes.length;
+  const [translateValue] = useState(new Animated.Value(0));
+  const [translateValueY] = useState(new Animated.Value(0));
+
+  const animateSlider = (index: number) => {
+    Animated.spring(translateValue, {
+      toValue: index * tabWidth,
+      velocity: 10,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  // const navigation = useNavigation();
+  const route = useRoute();
+  const currentRoute =
+    getFocusedRouteNameFromRoute(route) ?? RouteName.HomeRoute;
+
+  const getColor = (name: string, index: number): string => {
+    if (currentRoute === undefined) {
+      return index === 0 ? '#A32E8C' : '#B1B5C4';
+    }
+    if (name === currentRoute) {
+      return '#A32E8C';
+    }
+    return '#B1B5C4';
+  };
+  const insets = useSafeAreaInsets();
+  return (
+    <Animated.View style={[
+      styles.tabContainer,
+      {
+        height: HEIGHT_TAB_BAR + insets.bottom - (Platform.OS === 'ios' ? 20 : 5),
+        width: totalWidth,
+        transform: [{ translateY: translateValueY }],
+        paddingBottom: insets.bottom - 20,
+      },
+    ]}>
+      <View style={styles.row}>
+        <Animated.View
+          style={[
+            styles.slider,
+            {
+              transform: [{ translateX: translateValue }],
+              width: tabWidth,
+              backgroundColor: 'transparent',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          ]}
+        >
+          <View
+            style={[styles.init, {
+               width: tabWidth - 40,
+            }]}
+          />
+        </Animated.View>
+        {RouteList.map(
+          ({ name, title, icon, isBottom, i }, index) => {
+
+            const onPress = () => {
+              navigation.navigate(name);
+              animateSlider(i ?? 0);
+            };
+            if (!isBottom) return null;
+            return <TouchableOpacity
+              key={name}
+              onPress={onPress}
+              style={styles.flex}>
+              <View
+                style={styles.items}
+              >
+                {icon?.(getColor(name, index))}
+                <AppText style={[styles.text, { color: getColor(name, index) }]}>
+                  {title}
+                </AppText>
+              </View>
+            </TouchableOpacity>
+          }
+        )}
+      </View>
+    </Animated.View>
+  );
+});
+
+export default BottomTabContent;
+
+const styles = StyleSheet.create({
+  init: {
+   
+    height: 3,
+    borderRadius: 10,
+    backgroundColor: '#A32E8C',
+  },
+  main: {
+    bottom: 0,
+    right: 0,
+    left: 0,
+    elevation: 5,
+    height: Config.LAYOUT_CONFIG.HEIGHT_BOTTOM_TAB,
+    justifyContent: 'space-around',
+    position: 'absolute',
+    backgroundColor: '#fff',
+    borderTopWidth: 0.5,
+    borderColor: '#E1E1E1',
+  },
+  text: {
+    fontSize: 10,
+    marginTop: 5,
+  },
+  itemBottom: {
+    paddingBottom: 16,
+    paddingTop: 12,
+    alignItems: 'center',
+    width: '18%',
+  },
+  itemBottomFocus: {
+    borderTopColor: '#A32E8C',
+    borderTopWidth: 2,
+  },
+  tabContainer: {
+    shadowOffset: {
+      width: 0,
+      height: -1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4.0,
+    backgroundColor: 'white',
+    borderTopRightRadius: 20,
+    borderTopLeftRadius: 20,
+    elevation: 10,
+    position: 'absolute',
+    bottom: 0,
+    height: HEIGHT_TAB_BAR,
+  },
+  slider: {
+    height: 3,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    borderRadius: 10,
+  },
+  items: {
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+  },
+  flex: {
+    flex: 1,
+  },
+});

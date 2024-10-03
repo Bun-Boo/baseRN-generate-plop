@@ -1,0 +1,354 @@
+import React, {Key, MutableRefObject, ReactElement, useState} from 'react';
+import {
+  KeyboardTypeOptions,
+  TextInput,
+  TextInputIOSProps,
+  View,
+  StyleSheet,
+  ViewStyle,
+  StyleProp,
+} from 'react-native';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+import {Dropdown} from 'react-native-element-dropdown';
+import {useField, useFormikContext} from 'formik';
+import {FieldHookConfig} from 'formik/dist/Field';
+import DatePicker from 'react-native-date-picker';
+import moment from 'moment';
+import {isIOS} from 'src/utils/device';
+import ICHome from 'src/assets/icon/ICHome';
+import {Colors} from 'src/themes/Color';
+import {formatDateTime, format_DD_MM_YYYY} from 'src/utils/dateTime';
+import AppText from '../AppText';
+import AppView from '../AppView';
+import ICEyesPassword from 'src/assets/icon/ICEyesPassword';
+import ICNonEyesPassword from 'src/assets/icon/ICNonEyesPassword';
+
+interface TextInputGlobalProps {
+  isSubmitTime?: boolean;
+  isCallingInput?: boolean;
+  label: string;
+  placeholder: string;
+  size?: 'default' | 'medium' | 'bold' | 'light';
+  value?: string;
+  isPassword?: boolean;
+  disable?: boolean;
+  isIconMail?: boolean;
+  isIconDateTime?: boolean;
+  modeDateTime?: string;
+  style?: StyleProp<ViewStyle>;
+  maxLength?: number;
+  autoCorrect?: boolean;
+  onSubmitEditing?: ({nativeEvent: {text, eventCount, target}}: any) => void;
+  keyboardType?: KeyboardTypeOptions;
+  styleInput?: any;
+  multiline?: boolean;
+  numberOfLines?: number;
+  styleInputContainer?: any;
+  styleTextLabel?: any;
+  onFocus?: any;
+  require?: boolean;
+  textAlignVertical?: 'center' | 'auto' | 'bottom' | 'top' | undefined;
+  inputRef?: MutableRefObject<TextInput>;
+  textContentType?: TextInputIOSProps['textContentType'];
+  isDropdown?: boolean;
+  isSelectDateTimeInput?: boolean;
+  listDropdown?: Array<{
+    label: string;
+    value: Key;
+  }>;
+  onChangeDropdown?: (value: any) => void;
+  handleSubmitWarrantyTime?: (dateSelect: any) => void;
+  disableEditBackground?: boolean;
+  onChangeWithRegex?: boolean;
+  regexPattern?: object;
+  replacementCharacter?: string;
+}
+
+function TextInputGlobal(
+  props: TextInputGlobalProps & FieldHookConfig<string>,
+): ReactElement {
+  const {
+    label,
+    placeholder,
+    size,
+    value = '',
+    isPassword,
+    disable,
+    isIconMail,
+    isIconDateTime,
+    style,
+    maxLength = 255,
+    onSubmitEditing,
+    keyboardType = 'default',
+    modeDateTime = 'datetime',
+    styleInput,
+    multiline,
+    numberOfLines,
+    styleInputContainer,
+    styleTextLabel,
+    onFocus,
+    require,
+    autoCorrect = false,
+    textAlignVertical = undefined,
+    textContentType,
+    isDropdown,
+    isSelectDateTimeInput,
+    listDropdown = [],
+    onChangeDropdown,
+    disableEditBackground,
+    onChangeWithRegex = false,
+    replacementCharacter = '',
+    regexPattern,
+  } = props;
+
+  let fontWeightTitle;
+  switch (size) {
+    case 'medium':
+      fontWeightTitle = '600';
+      break;
+    case 'bold':
+      fontWeightTitle = '800';
+      break;
+    case 'light':
+      fontWeightTitle = '400';
+      break;
+    default:
+      fontWeightTitle = '500';
+  }
+
+  const [hidePass, setHidePass] = useState(isPassword);
+  const [field, meta, helpers] = useField(props);
+  const [open, setOpen] = useState(false);
+  const formikContext = useFormikContext();
+
+  if (!formikContext) {
+    throw new Error('TextInputGlobal has to be use inside Formik');
+  }
+
+  const setValue = (valueChange: any): void => {
+    const numericValue = valueChange.replace(
+      regexPattern,
+      replacementCharacter,
+    );
+    helpers.setValue(numericValue);
+  };
+
+  return (
+    <AppView fill style={style}>
+      {label.length > 0 && (
+        <AppText
+          color={Colors.gray800}
+          fontWeight={size ? fontWeightTitle : '500'}
+          fontSize={17}
+          marginBottom={10}
+          style={styleTextLabel}>
+          {label}
+          {require ? <AppText color={Colors.red}> *</AppText> : ''}
+        </AppText>
+      )}
+
+      {isDropdown ? (
+        <AppView>
+          <Dropdown
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            data={listDropdown}
+            itemTextStyle={styles.itemTextStyle}
+            labelField="label"
+            valueField="value"
+            value={value}
+            placeholder={placeholder}
+            onChange={(item): void => {
+              onChangeDropdown?.(item.value);
+            }}
+            keyboardAvoiding
+            disable={!!disable}
+          />
+        </AppView>
+      ) : isSelectDateTimeInput ? (
+        <View>
+          <TouchableOpacity
+            onPress={(): void => {
+              setOpen(!open);
+            }}
+            hitSlop={styles.hitSlop}>
+            <View
+              style={[
+                styleInputContainer,
+                styles.inputContainer,
+                {
+                  backgroundColor: disable ? 'white' : 'white',
+                  justifyContent: 'space-between',
+                },
+              ]}>
+              <TouchableOpacity
+                onPress={(): void => {
+                  setOpen(!open);
+                }}>
+                <TextInput
+                  autoCorrect={autoCorrect}
+                  onBlur={formikContext.handleBlur(field.name)}
+                  onChangeText={helpers.setValue}
+                  value={formatDateTime(field.value, format_DD_MM_YYYY)}
+                  autoComplete="email"
+                  textContentType={textContentType}
+                  autoCapitalize="none"
+                  ref={props.inputRef}
+                  style={[styles.inputField, styleInput]}
+                  placeholderTextColor="#ccc"
+                  placeholder={placeholder}
+                  secureTextEntry={!!hidePass}
+                  enablesReturnKeyAutomatically
+                  editable={!disable}
+                  selectTextOnFocus={!disable}
+                  maxLength={maxLength}
+                  onSubmitEditing={onSubmitEditing}
+                  keyboardType={keyboardType}
+                  multiline={multiline}
+                  numberOfLines={numberOfLines}
+                  onFocus={onFocus}
+                  textAlignVertical={textAlignVertical}
+                />
+              </TouchableOpacity>
+              {isIconDateTime && <ICHome />}
+            </View>
+            <DatePicker
+              title="Chọn thời gian"
+              modal
+              locale="vi"
+              open={open}
+              date={moment(field.value).toDate()}
+              mode={modeDateTime as any}
+              theme="light"
+              minimumDate={
+                modeDateTime === 'datetime'
+                  ? new Date()
+                  : moment(new Date()).toDate()
+              }
+              minuteInterval={15}
+              onConfirm={(dateSelect): void => {
+                setOpen(false);
+                helpers.setValue(dateSelect as any);
+              }}
+              onCancel={(): void => {
+                setOpen(false);
+              }}
+              confirmText="Xác nhận"
+              cancelText="Huỷ"
+            />
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View
+          style={[
+            styleInputContainer,
+            styles.inputContainer,
+            {
+              backgroundColor: disableEditBackground ? '#F5F5F5' : 'white',
+            },
+          ]}>
+          <TextInput
+            autoCorrect={autoCorrect}
+            onBlur={formikContext.handleBlur(field.name)}
+            onChangeText={onChangeWithRegex ? setValue : helpers.setValue}
+            value={field.value}
+            autoComplete="email"
+            textContentType={textContentType}
+            autoCapitalize="none"
+            ref={props.inputRef}
+            style={[styles.inputField, styleInput]}
+            placeholderTextColor="#ccc"
+            placeholder={placeholder}
+            secureTextEntry={!!hidePass}
+            enablesReturnKeyAutomatically
+            editable={!disable}
+            selectTextOnFocus={!disable}
+            maxLength={maxLength}
+            onSubmitEditing={onSubmitEditing}
+            keyboardType={keyboardType}
+            multiline={multiline}
+            numberOfLines={numberOfLines}
+            onFocus={onFocus}
+            textAlignVertical={textAlignVertical}
+          />
+          {isPassword && (
+            <TouchableOpacity onPress={(): void => setHidePass(!hidePass)}>
+              {hidePass ? <ICNonEyesPassword /> : <ICEyesPassword />}
+            </TouchableOpacity>
+          )}
+          {isIconMail && <ICHome />}
+        </View>
+      )}
+      <View>
+        {meta.error && meta.touched ? (
+          <AppText color={Colors.red}>{meta.error}</AppText>
+        ) : (
+          <AppText />
+        )}
+      </View>
+    </AppView>
+  );
+}
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  inputContainer: {
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderColor: '#ccc',
+    borderRadius: 6,
+    borderWidth: 1,
+    color: 'black',
+    flexDirection: 'row',
+    paddingRight: 16,
+    paddingLeft: 10,
+    paddingVertical: isIOS ? 13 : 0,
+    width: '100%',
+  },
+
+  inputField: {
+    color: 'black',
+    width: '97%',
+  },
+  labelInput: {
+    color: 'black',
+    fontWeight: '500',
+    fontSize: 17,
+    marginBottom: 10,
+  },
+
+  emailIcon: {
+    color: '#ccc',
+    marginRight: 5,
+  },
+  dropdown: {
+    borderColor: '#ccc',
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    borderWidth: 2,
+    height: 48,
+    paddingRight: 16,
+    paddingLeft: 8,
+    width: '100%',
+  },
+
+  placeholderStyle: {
+    color: '#ccc',
+    fontSize: 14,
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+  },
+  itemTextStyle: {
+    fontSize: 14,
+  },
+  hitSlop: {
+    top: 30,
+    bottom: 30,
+    left: 30,
+    right: 30,
+},
+});
+export default TextInputGlobal;

@@ -1,0 +1,29 @@
+import React from 'react';
+import ImageGlobal from '../ImageGlobal';
+import {StyleSheet, View} from 'react-native';
+
+interface INoDataProps {
+  width?: number;
+  height?: number;
+}
+
+function NoData(props: INoDataProps) {
+  const {width = 150, height = 150} = props;
+  return (
+    <View style={styles.padding}>
+      <ImageGlobal
+        width={width}
+        height={height}
+        imageDefault={require('../../../assets/image/logo.png')}
+      />
+    </View>
+  );
+}
+
+export default NoData;
+
+const styles = StyleSheet.create({
+  padding: {
+    paddingVertical: 16
+  },
+});

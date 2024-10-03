@@ -1,0 +1,384 @@
+import React, {ReactElement, useState} from 'react';
+import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import Modal from 'react-native-modal';
+import FastImage from 'react-native-fast-image';
+import ImagePicker from 'react-native-image-crop-picker';
+import {isIOS} from 'src/utils/device';
+import AppText from '../AppText';
+import ICCamera from 'src/assets/icons/ICCamera';
+import ImageGlobal from '../ImageGlobal';
+import ICClose from 'src/assets/icons/ICClose';
+import AppView from '../AppView';
+import ImageResizer from 'react-native-image-resizer';
+import ICCameraProfile from 'src/assets/icons/ICCameraProfile';
+import ICImage from 'src/assets/icons/ICImage';
+import TouchableGlobal from 'src/components/globals/TouchableGlobal';
+
+interface AppUploadMultiImageProps {
+  imageChoose?: any;
+  handleChangeImage?: (value: any) => void;
+  showAddImage?: boolean;
+  isEditSingleImage?: boolean;
+  isUploadSingleImage?: boolean;
+}
+
+function AppUploadMultiImage({
+  imageChoose = undefined,
+  showAddImage,
+  isEditSingleImage,
+  handleChangeImage,
+  isUploadSingleImage,
+}: AppUploadMultiImageProps): ReactElement {
+  const defaultImage = require('../../../assets/image/noAvatar.png');
+  const defaultAddImage = require('../../../assets/image/defaultUploadImage.png');
+
+  const [visible, setVisible] = useState<boolean>(false);
+
+  const close = (): void => setVisible(false);
+  const open = (): void => setVisible(true);
+
+  const chooseImage = (): void => {
+    ImagePicker.openPicker({
+      mediaType: 'photo',
+      quality: 0.8,
+      compressImageMaxWidth: 1024,
+      compressImageMaxHeight: 1024,
+      multiple: true,
+      maxFiles: 1,
+    })
+      .then(images => {
+        const compressedImages = [] as any;
+
+        const compressImage = (image: any): any => {
+          return new Promise((resolve, reject) => {
+            if (image.size <= 300 * 1024) {
+              // Image size is already within the limit, no need to compress
+              resolve(image);
+            } else {
+              ImageResizer.createResizedImage(
+                image.path,
+                800,
+                800,
+                'JPEG',
+                80,
+                0,
+                undefined,
+                false,
+                {
+                  mode: 'contain',
+                  onlyScaleDown: true,
+                },
+              )
+                .then(croppedImage => {
+                  const convertResult = {
+                    name: `image${Date.now()}`,
+                    mime: 'image/jpeg',
+                    path: croppedImage.uri,
+                  };
+                  resolve(convertResult);
+                })
+                .catch(error => reject(error));
+            }
+          });
+        };
+
+        const compressAllImages = async () => {
+          try {
+            for (let i = 0; i < images.length; i++) {
+              const image = images[i];
+
+              const compressedImage = await compressImage(image);
+              compressedImages.push({
+                name: `image${Date.now()}`,
+                type: compressedImage.mime || 'image/jpg',
+                uri: compressedImage.path,
+              });
+            }
+            if (handleChangeImage) {
+              handleChangeImage(compressedImages);
+            }
+          } catch (error) {
+            console.log('Image processing error: ', error);
+          }
+        };
+
+        compressAllImages();
+      })
+      .finally(close);
+  };
+
+  const openCamera = (): void => {
+    ImagePicker.openCamera({
+      quality: 0.8,
+      compressImageMaxWidth: 1024,
+      compressImageMaxHeight: 1024,
+    })
+      .then(images => {
+        const compressedImages = [] as any;
+
+        const compressImage = (image: any): any => {
+          return new Promise((resolve, reject) => {
+            if (image.size <= 300 * 1024) {
+              // Image size is already within the limit, no need to compress
+              resolve(image);
+            } else {
+              ImageResizer.createResizedImage(
+                image.path,
+                800,
+                800,
+                'JPEG',
+                80,
+                0,
+                undefined,
+                false,
+                {
+                  mode: 'contain',
+                  onlyScaleDown: true,
+                },
+              )
+                .then(croppedImage => {
+                  const convertResult = {
+                    name: `image${Date.now()}`,
+                    mime: 'image/jpeg',
+                    path: croppedImage.uri,
+                  };
+                  resolve(convertResult);
+                })
+                .catch(error => reject(error));
+            }
+          });
+        };
+
+        const compressAllImages = async () => {
+          try {
+            for (let i = 0; i < 1; i++) {
+              const compressedImage = await compressImage(images);
+              compressedImages.push({
+                name: `image${Date.now()}`,
+                type: compressedImage.mime || 'image/jpg',
+                uri: compressedImage.path,
+              });
+            }
+            handleChangeImage?.(compressedImages);
+          } catch (error) {
+            console.log('Image processing error: ', error);
+          }
+        };
+
+        compressAllImages();
+      })
+      .finally(close);
+  };
+
+  return (
+    <AppView style={styles.listImageContainer}>
+      {showAddImage && (
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={(): void => {
+            open();
+          }}
+          style={styles.imageItemWrapper}>
+          {imageChoose.length < 6 ? (
+            <ImageGlobal
+              resizeMode="cover"
+              imageDefault={defaultAddImage}
+              // eslint-disable-next-line react-native/no-inline-styles
+              {{!-- styleImage={{
+                ...styles.imageProduct,
+                marginHorizontal: 5,
+                marginBottom: 5,
+              }} --}}
+            />
+          ) : (
+            <View />
+          )}
+        </TouchableOpacity>
+      )}
+
+      {!isUploadSingleImage &&
+        imageChoose.length > 0 &&
+        imageChoose?.map((item: any, index: number): ReactElement => {
+          return (
+            <TouchableOpacity key={index} onPress={(): void => {}}>
+              <FastImage
+                {{!-- style={{
+                  ...styles.imageProduct,
+                  marginHorizontal: 5,
+                  marginBottom: 5,
+                }} --}}
+                source={
+                  item?.uri || item?.url
+                    ? {uri: item?.uri || item?.url}
+                    : defaultImage
+                }
+                resizeMode={FastImage.resizeMode.cover}
+              />
+              {showAddImage && (
+                <TouchableOpacity
+                  style={styles.showAddImage}
+                  onPress={(): void => {
+                    handleChangeImage?.(
+                      imageChoose.filter(
+                        (i: {uri: any; url: any}) =>
+                          i.uri !== item.uri || i.url !== item.url,
+                      ),
+                    );
+                  }}>
+                  <ICClose />
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+          );
+        })}
+
+      {isUploadSingleImage &&
+        imageChoose.length > 0 &&
+        imageChoose?.map((item: any, index: number): ReactElement => {
+          return (
+            <View style={styles.avatarWrap} key={index}>
+              <FastImage
+                style={styles.avatar}
+                source={
+                  item?.uri || item?.url
+                    ? {uri: item?.uri || item?.url}
+                    : defaultImage
+                }
+                resizeMode="cover"
+              />
+              {isEditSingleImage ? (
+                <TouchableOpacity
+                  style={styles.iconCamera}
+                  onPress={(): void => {
+                    open();
+                  }}>
+                  <ICCamera />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          );
+        })}
+
+      <Modal
+        isVisible={visible}
+        onBackButtonPress={close}
+        onBackdropPress={close}
+        backdropTransitionOutTiming={0}
+        backdropTransitionInTiming={0}
+        backdropOpacity={0.3}
+        style={styles.flexEnd}>
+        <View style={styles.options}>
+          <AppView 
+          {{!-- style={{...styles.option, borderBottomWidth: 5}} --}}
+          >
+            <AppText fontSize={20} size="medium">
+              Select Image
+            </AppText>
+          </AppView>
+          <TouchableGlobal style={styles.option} onPress={chooseImage}>
+            <AppView rowAlignCenter>
+              <ICImage />
+              <AppText
+                size="light"
+                fontSize={18}
+                paddingLeft={5}
+                color="#A32E8C">
+                Choose from Library
+              </AppText>
+            </AppView>
+          </TouchableGlobal>
+          <TouchableGlobal
+            onPress={openCamera}
+            {{!-- style={{...styles.option, borderBottomWidth: 5}} --}}
+            >
+            <AppView rowAlignCenter>
+              <ICCameraProfile />
+              <AppText
+                size="light"
+                fontSize={18}
+                paddingLeft={5}
+                color="#A32E8C">
+                Take Photo
+              </AppText>
+            </AppView>
+          </TouchableGlobal>
+        </View>
+      </Modal>
+    </AppView>
+  );
+}
+
+export default AppUploadMultiImage;
+const styles = StyleSheet.create({
+  listImageContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+    justifyContent: 'center',
+  },
+  imageProduct: {
+    height: 90,
+    width: isIOS ? 85 : 80,
+    borderRadius: 3,
+  },
+  imageItemWrapper: {
+    position: 'relative',
+  },
+  iconClose: {
+    position: 'absolute',
+    right: 2,
+    top: 2,
+  },
+  options: {
+    backgroundColor: 'white',
+    borderTopRightRadius: 30,
+    borderTopLeftRadius: 30,
+    height: 200,
+  },
+
+  option: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column',
+    borderBottomColor: 'rgba(243, 243, 243, 1)',
+    borderBottomWidth: 2,
+  },
+  avatarWrap: {
+    // marginBottom: 30,
+    alignItems: 'center',
+  },
+  avatar: {
+    height: 131,
+    width: 131,
+    borderRadius: 65.5,
+  },
+  iconCamera: {
+    backgroundColor: '#E6E8EC',
+    borderRadius: 20,
+    bottom: 0,
+    // padding: 6,
+    width: 28,
+    height: 28,
+    paddingBottom: 2,
+    paddingRight: 1,
+    position: 'absolute',
+    right: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  showAddImage: {
+    position: 'absolute',
+    right: 5,
+    width: 20,
+    height: 20,
+    top: 0,
+    backgroundColor: 'red',
+    borderRadius: 10,
+  },
+  flexEnd: {
+    justifyContent: "flex-end",
+    margin: 0
+  },
+});

@@ -1,0 +1,26 @@
+import React, {ReactElement} from 'react';
+import {StyleSheet, ActivityIndicator, View} from 'react-native';
+
+interface ILoading {
+  colorLoading?: string;
+  size?: 'small' | 'large';
+}
+
+function Loading(props: ILoading): ReactElement {
+  const {colorLoading, size = 'small'} = props;
+
+  return (
+    <View style={styles.center}>
+      <ActivityIndicator size={size} color={colorLoading || 'blue'} />
+    </View>
+  );
+}
+
+export default Loading;
+
+const styles = StyleSheet.create({
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});

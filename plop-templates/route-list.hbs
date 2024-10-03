@@ -1,0 +1,21 @@
+import { ReactNode } from 'react';
+import React from 'react';
+import RouteName from './RouteName';
+
+interface IRoute {
+  component: any;
+  name: string;
+  title: string;
+  icon?: (color?: string) => ReactNode;
+  isPrivate?: boolean;
+  isCenter?: boolean;
+  isBottom?: boolean;
+  i?: number;
+  isModal?: boolean;
+  typeHeader?: 'back' | 'mini-back';
+}
+
+const routes: IRoute[] = [
+];
+
+export default routes;

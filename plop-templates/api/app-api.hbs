@@ -1,0 +1,24 @@
+import {fetcher} from '../Fetcher';
+
+export interface I{{pascalCase apiName}} {
+}
+export interface I{{pascalCase apiName}}Response {
+}
+
+const path = {
+    {{camelCase pathName}}: '{{pathApi}}',
+};
+
+{{#if (eq methodName 'get')}}
+function {{camelCase functionName}}(param?: I{{pascalCase apiName}}): Promise<I{{pascalCase apiName}}Response> {
+    return fetcher({url: path.{{camelCase pathName}}, method: '{{methodName}}', param: param});
+}
+{{else}}
+function {{camelCase functionName}}(body: I{{pascalCase apiName}}): Promise<I{{pascalCase apiName}}Response> {
+    return fetcher({url: path.{{camelCase pathName}}, method: '{{methodName}}', data: body});
+}
+
+export default {
+    {{camelCase functionName}},
+};
+{{/if}}

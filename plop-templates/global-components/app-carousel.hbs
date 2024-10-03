@@ -1,0 +1,171 @@
+import React, {ReactElement, useEffect, useRef, useState} from 'react';
+import {Animated, FlatList, StyleSheet, Text, View} from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
+import CarouselImage from './CaroselImage';
+import store from 'src/redux/store';
+import {screenWidth} from 'src/utils/responsive';
+import AppView from 'src/components/globals/AppView';
+import AppText from 'src/components/globals/AppText';
+
+interface CarouselItemProps {
+  data?: {
+    id: number;
+    image: string;
+  }[];
+  styleImage?: any;
+  onPress?: () => void;
+  isRenderItemCustom?: boolean;
+  renderItemCustom?: (item: any, index: number) => ReactElement | undefined;
+  type?: string;
+}
+
+
+function Carousel({
+  data = [],
+  onPress,
+  styleImage,
+  isRenderItemCustom = false,
+  renderItemCustom,
+  type,
+}: CarouselItemProps) {
+  const scrollX = new Animated.Value(0);
+  const position = Animated.divide(scrollX, screenWidth);
+  const carouselRef = useRef<FlatList | null>(null);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(scrollToNext, 4000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [currentIndex, data]);
+
+  const scrollToNext = () => {
+    if (data.length > 0 && carouselRef.current) {
+      const nextIndex = (currentIndex + 1) % data.length;
+      carouselRef.current.scrollToIndex({index: nextIndex});
+      setCurrentIndex(nextIndex);
+    }
+  };
+
+  const handleScroll = (event: any) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / screenWidth);
+    setCurrentIndex(index);
+  };
+
+  if (!data || data.length === 0) {
+    return <View />;
+  }
+
+  const getPositionValues = (type: string | undefined) => {
+    let bottomValue, rightValue;
+    if (type === 'community') {
+      bottomValue = '28%';
+      rightValue = 8;
+    } else if (type === 'aboutEvent') {
+      bottomValue = '26%';
+      rightValue = 8;
+    } else if (type === 'aboutUs') {
+      bottomValue = 6;
+      rightValue = 20;
+    } else {
+      bottomValue = 8;
+      rightValue = 8;
+    }
+    return {bottomValue, rightValue};
+  };
+  const {bottomValue, rightValue} = getPositionValues(type);
+
+  return (
+    <View style={styles.root}>
+      <FlatList
+        ref={carouselRef}
+        data={data}
+        keyExtractor={(item, index): string => 'key' + index}
+        horizontal
+        pagingEnabled
+        onMomentumScrollEnd={handleScroll}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {x: scrollX}}}],
+          {useNativeDriver: false},
+        )}
+        showsHorizontalScrollIndicator={false}
+        renderScrollComponent={(scrollComponentProps): ReactElement => (
+          <ScrollView {...scrollComponentProps} />
+        )}
+        renderItem={({item, index}): ReactElement | any =>
+          isRenderItemCustom ? (
+            renderItemCustom?.(item, index)
+          ) : (
+            <CarouselImage
+              image={item.image}
+              onPress={onPress}
+              styleImage={styleImage}
+              type={type}
+            />
+          )
+        }
+      />
+
+      <AppView
+        position="absolute"
+        bottom={bottomValue}
+        right={rightValue}
+        backgroundColor="rgba(0, 0, 0, 0.35)"
+        paddingVertical={4}
+        paddingHorizontal={8}
+        radius={2}>
+        <AppText color="white" fontSize={12}>
+          {currentIndex + 1}/{data.length}
+        </AppText>
+      </AppView>
+      <View style={styles.dotView}>
+        {data.map((_: any, index: number) => {
+          const opacity = position.interpolate({
+            inputRange: [index - 1, index, index + 1],
+            outputRange: [0.1, 1, 0.1],
+            extrapolate: 'clamp',
+          });
+          return (
+            <Animated.View
+              key={index}
+              style={[
+                styles.dotItem,
+                {opacity},
+                {
+                  backgroundColor: '#000',
+                },
+              ]}
+            />
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  dotItem: {
+    backgroundColor: '#000',
+    // borderRadius: 4,
+    height: 6,
+    width: 14,
+    // margin: 2.5,
+  },
+  dotView: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    position: 'absolute',
+    bottom: -15,
+    left: '50%',
+    right: '50%',
+    borderRadius: 2,
+  },
+  root: {
+    position: 'relative',
+  },
+});
+
+export default Carousel;

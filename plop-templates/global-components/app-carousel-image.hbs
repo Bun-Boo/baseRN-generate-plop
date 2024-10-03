@@ -1,0 +1,33 @@
+import React, {ReactElement} from 'react';
+import {screenWidth} from 'src/utils/responsive';
+import ImageGlobal from '../ImageGlobal';
+import TouchableGlobal from '../TouchableGlobal';
+
+interface CarouselItemProps {
+  image?: string;
+  onPress?: () => void;
+  styleImage?: any;
+  type?: string;
+}
+
+function CarouselImage(props: CarouselItemProps): ReactElement {
+  const {image, onPress, styleImage, type} = props;
+
+  return (
+    <TouchableGlobal
+      marginHorizontal={type === 'aboutUs' ? 15 : 0}
+      opacity={1}
+      onPress={onPress}>
+      <ImageGlobal
+        height={200}
+        width={type === 'aboutUs' ? screenWidth - 30 : screenWidth - 20}
+        borderRadius={2}
+        url={image}
+        resizeMode="cover"
+        styleImage={styleImage}
+      />
+    </TouchableGlobal>
+  );
+}
+
+export default CarouselImage;

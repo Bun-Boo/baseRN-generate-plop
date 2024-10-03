@@ -1,0 +1,61 @@
+import React from 'react';
+import {StyleProp, StyleSheet, ViewStyle} from 'react-native';
+import {Dropdown} from 'react-native-element-dropdown';
+
+// thiếu trường gì có thể tự thêm - KHÔNG ẢNH HƯỞNG ĐẾN CODE MỌI NGỪOI LÀ ĐƯỢC
+interface IAppDropdownProps {
+  labelField?: string;
+  valueField?: string;
+  data?: any[];
+  value?: any;
+  onChange: (value: any) => void;
+  placeholder?: string;
+  style?: StyleProp<ViewStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
+}
+
+function AppDropdown(props: IAppDropdownProps) {
+  return (
+    <Dropdown
+      value={props.value}
+      data={props.data ?? []}
+      keyboardAvoiding
+      labelField={props.labelField ?? 'label'}
+      valueField={props.valueField ?? 'value'}
+      style={[styles.dropdown, props.style]}
+      placeholder={props.placeholder}
+      placeholderStyle={styles.placeholderStyle}
+      selectedTextStyle={styles.selectedTextStyle}
+      itemTextStyle={styles.itemTextStyle}
+      containerStyle={props.containerStyle}
+      onChange={props.onChange}
+    />
+  );
+}
+
+const styles = StyleSheet.create({
+  dropdown: {
+    borderColor: '#ccc',
+    backgroundColor: '#fff',
+    borderRadius: 7,
+    borderWidth: 1,
+    height: 45,
+    paddingRight: 16,
+    paddingLeft: 8,
+    width: '100%',
+  },
+  placeholderStyle: {
+    fontSize: 14,
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+    color: '#000000',
+  },
+  itemTextStyle: {
+    fontSize: 14,
+    marginVertical: -8,
+    color: '#000000',
+  },
+});
+
+export default AppDropdown;

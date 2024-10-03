@@ -1,0 +1,59 @@
+import React, {ReactElement, useState, useEffect} from 'react';
+import {StyleSheet} from 'react-native';
+import FastImage, {ResizeMode} from 'react-native-fast-image';
+
+interface ImageComponentProps {
+  url?: string;
+  imageDefault?: object;
+  styleImage?: any;
+  resizeMode?: ResizeMode | undefined;
+  height?: number;
+  width?: number;
+  borderRadius?: number;
+}
+function ImageGlobal({
+  resizeMode = 'contain',
+  height = 75,
+  width = 75,
+  borderRadius = 8,
+  url,
+  imageDefault,
+  styleImage,
+  ...props
+}: ImageComponentProps): ReactElement {
+  const styles = StyleSheet.create({
+    baseStyleImage: {
+      height: height,
+      width: width,
+      borderRadius: borderRadius,
+    },
+  });
+  const [isImageError, setIsImageError] = useState(false);
+  const [urlImg, setUrlImg] = useState(url);
+
+  const handleImageError = (): void => {
+    setIsImageError(true);
+  };
+  useEffect(() => {
+    if (url) {
+      setUrlImg(url);
+    }
+  }, [url, isImageError]);
+  return (
+    <FastImage
+      {...props}
+      source={
+        !isImageError && urlImg
+          ? {
+              uri: urlImg,
+            }
+          : imageDefault
+      }
+      style={[styles.baseStyleImage, styleImage]}
+      onError={handleImageError}
+      resizeMode={resizeMode}
+    />
+  );
+}
+
+export default ImageGlobal;

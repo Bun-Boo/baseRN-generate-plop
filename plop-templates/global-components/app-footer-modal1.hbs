@@ -1,0 +1,64 @@
+import React, {ReactElement} from 'react';
+import {TouchableOpacity, StyleSheet} from 'react-native';
+import AppText from '../../AppText';
+import AppView from '../../AppView';
+
+interface IFooterModal {
+  confirmText: string | undefined;
+  cancelText: string | undefined;
+  toggleModal: () => void;
+  onConfirm: (() => void) | undefined;
+  disable: boolean | undefined;
+  singleBtnConfirm?: boolean;
+}
+
+function FooterModal({
+  cancelText = 'Cancel',
+  confirmText = 'Confirm',
+  onConfirm,
+  toggleModal,
+  disable,
+  singleBtnConfirm,
+}: IFooterModal): ReactElement {
+  return (
+    <AppView rowAlignCenter justify="space-between" padding={10} marginTop={18}>
+      {!singleBtnConfirm ? (
+        <TouchableOpacity
+          style={[styles.btnCustom, styles.bg]}
+          onPress={toggleModal}
+          disabled={disable}>
+          <AppText styleType="bold" color="#989898" fontSize={18}>
+            {cancelText}
+          </AppText>
+        </TouchableOpacity>
+      ) : null}
+
+      <TouchableOpacity
+        style={styles.btnCustom}
+        onPress={(): void => {
+          onConfirm?.();
+          toggleModal();
+        }}
+        disabled={disable}>
+        <AppText styleType="bold" color="white" fontSize={18}>
+          {confirmText}
+        </AppText>
+      </TouchableOpacity>
+    </AppView>
+  );
+}
+
+const styles = StyleSheet.create({
+  btnCustom: {
+    backgroundColor: '#A32E8C',
+    alignItems: 'center',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    width: '47%',
+  },
+  bg: {
+    backgroundColor: '#E3E3E3',
+  }
+});
+export default FooterModal;

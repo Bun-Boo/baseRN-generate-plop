@@ -1,0 +1,114 @@
+import { CommonActions, StackActions } from '@react-navigation/native';
+
+let navigator: any;
+let activeScreen: string;
+let parentOfActiveScreen: string;
+let animatedNavigator: any;
+
+function setTopLevelNavigator(ref: any) {
+    navigator = ref;
+}
+
+function setAnimatedNavigator(a: any) {
+    animatedNavigator = a;
+}
+
+function animatedTo(index: number) {
+    return animatedNavigator(index);
+}
+
+
+function navigate(routeName: any, params?: any) {
+    console.log('NAVIGATION SERVICE: ' + navigator);
+
+    navigator.dispatch(
+        CommonActions.navigate({
+            name: routeName,
+            params: params,
+        }),
+    );
+}
+function push(routeName: any, params?: any) {
+    console.log('NAVIGATION SERVICE: ' + navigator);
+    removeFromStack(routeName);
+    navigator.dispatch(StackActions.push(routeName, params));
+}
+function replace(routeName: any, params?: any) {
+    console.log('NAVIGATION SERVICE: ' + navigator);
+    removeFromStack(routeName);
+    navigator.dispatch(StackActions.replace(routeName, params));
+}
+
+function reset(routeName: string, params?: object, action?: any) {
+    navigator.dispatch(
+        CommonActions.reset({
+            index: 0,
+            routes: [{ name: routeName, params }],
+        }),
+    );
+}
+function reset2(routes: Array<any>) {
+    navigator.dispatch(
+        CommonActions.reset({
+            index: 0,
+            routes,
+        }),
+    );
+}
+function removeFromStack(routeName: string, params?: object, action?: any) {
+    navigator.dispatch(state => {
+        // Remove the home route from the stack
+        const routes = state?.routes?.filter(r => r.name !== routeName);
+
+        return CommonActions.reset({
+            ...state,
+            routes,
+            index: routes.length - 1,
+        });
+    });
+}
+
+function pop() {
+    navigator.dispatch(CommonActions.goBack());
+}
+
+function setActiveScreen(screen: string) {
+    activeScreen = screen;
+}
+
+function getActiveScreen() {
+    return activeScreen;
+}
+
+function getParentOfActiveScreen() {
+    return parentOfActiveScreen;
+}
+
+function setParentOfActiveScreen(screen: string) {
+    parentOfActiveScreen = screen;
+}
+
+function getNavigator() {
+    return navigator;
+}
+
+// add other navigation functions that you need and export them
+
+export default {
+    navigator,
+    navigate,
+    setTopLevelNavigator,
+    pop,
+    reset,
+    push,
+    setActiveScreen,
+    getActiveScreen,
+    getParentOfActiveScreen,
+    setParentOfActiveScreen,
+    getNavigator,
+    reset2,
+    removeFromStack,
+    replace,
+    setAnimatedNavigator,
+    animatedTo,
+};

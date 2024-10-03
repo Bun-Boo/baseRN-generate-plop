@@ -1,0 +1,57 @@
+import React, {useEffect, useState} from 'react';
+import ICSearch from 'src/assets/icons/ICSearch';
+import {StyleSheet, View, TextInput} from 'react-native';
+import useDebounce from 'src/utils/customHook/useDebounce';
+
+// thiếu trường gì có thể tự thêm - KHÔNG ẢNH HƯỞNG ĐẾN CODE MỌI NGỪOI LÀ ĐƯỢC
+interface IAppSearchProps {
+  onChange: (value: string) => void;
+  delay?: number;
+  placeholder?: string;
+}
+
+function AppSearch(props: IAppSearchProps) {
+  const {onChange, delay = 500, placeholder} = props;
+
+  const [searchValue, setSearchValue] = useState('');
+
+  const searchValueTerm = useDebounce(searchValue, delay);
+
+  useEffect(() => {
+    onChange(searchValueTerm ?? '');
+  }, [onChange, searchValueTerm]);
+
+  return (
+    <View style={styles.inputContainer}>
+      <ICSearch color="#ccc" />
+      <TextInput
+        style={styles.inputField}
+        placeholderTextColor="#ccc"
+        placeholder={placeholder}
+        onChangeText={text => setSearchValue(text)}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderColor: '#ccc',
+    borderRadius: 8,
+    borderWidth: 0.5,
+    color: 'black',
+    flexDirection: 'row',
+    paddingHorizontal: 10,
+    height: 40,
+    width: '100%',
+  },
+  inputField: {
+    color: 'black',
+    width: '90%',
+    marginLeft: 5,
+  },
+});
+
+export default AppSearch;
