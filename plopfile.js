@@ -22,6 +22,20 @@ module.exports = function (plop) {
           path: 'src/screens/{{nameScreen}}/{{pascalCase subNameScreen}}/index.tsx',
           templateFile: 'plop-templates/screen.hbs',
         },
+        {
+          type: 'add',
+          path: 'src/routes/RouteName.tsx',
+          templateFile: 'plop-templates/route-name.hbs',
+          skip: function () {
+            return fs.existsSync('src/routes/RouteName.tsx') ? 'File already exists' : undefined;
+          },
+        },
+        {
+          type: 'modify',
+          path: 'src/routes/RouteName.tsx',
+          pattern: /(enum RouteName \{[\s\S]*?)(\n\})/,
+          template: `$1\n\t{{pascalCase subNameScreen}} = '{{pascalCase subNameScreen}}', \n}`,
+        }
       ],
     });
   
